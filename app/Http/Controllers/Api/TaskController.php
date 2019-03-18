@@ -8,79 +8,141 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 
      */
     public function index()
     {
-        //
+        $tasks = Task::all();
+
+        return response($tasks, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function uncompleted()
     {
-        //
+        $uncompleted = Task::where('completed', 0)->get();
+
+        return response($uncompleted, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function completed()
     {
-        //
+        $completed = Task::where('completed', 1)->get();
+        
+        return response($completed, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Task $task)
+    public function create(Request $request)
     {
-        //
+        $task = Task::create([
+            'name' => $request->input('name'),
+        ]);
+
+        return response($task, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Task $task)
+    public function complete($id)
     {
-        //
+        $task = Task::where('id', $id)->first();
+
+        if (!$task) {
+            return response('', 404)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'charset' => 'utf8'
+                ]);
+        }
+
+        $task->completed = 1;
+        $task->save();
+
+        return response($task, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Task $task)
+    public function uncomplete($id)
     {
-        //
+        $task = Task::where('id', $id)->first();
+
+        if (!$task) {
+            return response('', 404)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'charset' => 'utf8'
+                ]);
+        }
+
+        $task->completed = 0;
+        $task->save();
+
+        return response($task, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Task $task)
+    public function edit(Request $request, $id)
     {
-        //
+        $task = Task::where('id', $id)->first();
+
+        if (!$task) {
+            return response('', 404)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'charset' => 'utf8'
+                ]);
+        }
+
+        $task->name = $request->input('name');
+        $task->save();
+
+        return response($task, 200)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
+
+    }
+
+    public function destroy($id)
+    {
+        $task = Task::where('id', $id)->first();
+
+        if (!$task) {
+            return response('', 404)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'charset' => 'utf8'
+                ]);
+        }
+
+        $task->delete();
+
+        return response('', 204)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'charset' => 'utf8'
+            ]);
     }
 }
